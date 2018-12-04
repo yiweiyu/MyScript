@@ -1,0 +1,346 @@
++-------------------------------+-----------------------------+
+|            name               |              ID             |
++-------------------------------+-----------------------------+
+|        decompression.pm       |              1              |
++-------------------------------+-----------------------------+
+|            fq2fa.pm           |              2              |
++-------------------------------+-----------------------------+
+|          log_info.pm          |              3              |
++-------------------------------+-----------------------------+
+|            MKDIR.pm           |              4              |
++-------------------------------+-----------------------------+
+|           openfile.pm         |              5              |
++-------------------------------+-----------------------------+
+|         read_config.pm        |              6              |
++-------------------------------+-----------------------------+
+|           runcmd.pm           |              7              |
++-------------------------------+-----------------------------+
+|          statistic.pm         |              8              |
++-------------------------------+-----------------------------+
+|          sub_time.pm          |              9              |
++-------------------------------+-----------------------------+
+|            trim.pm            |              10             |
++-------------------------------+-----------------------------+
+|          uncompress.pm        |              11             |
++-------------------------------+-----------------------------+
+
+
+ID1 decompression.pm
+
+NAME
+
+decompression - decompression for the input fq file, only one file is allowed at a time.
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use decompression;
+decompression::help(); #Print this help information
+my ($fq_in,$filenamein)=decompression($fqin,$outdir);
+print "$fq_in\n$filenamein\n";
+#**************************************************************************************
+# $fqin is the directory of input fq file which needs decompression.
+# $outdir is the output directory where the decompressed fq file is expected to locate.
+#
+# If $fqin isn't a compressed package, $fq_in is the original fq directory i.e. $fq1,
+# and $filenamein is a directory under $outdir which does not exist but the downstream
+# process may use as the prefix of its output. Otherwise both $fq_1 and $filename1 
+# represent the directory of decompressed fq file.
+#**************************************************************************************
+
+DESCRIPTION
+
+The main focus of the decompression.pm is to get two kinds of directories:
+1. the directory of available fq file which isn't a compressed package;
+2. the directory that the downstream process may use as the prefix of its output.
+
+After the trimming, two more files -- time log and error log will be generated. 
+They have names "LOG.txt" and "LOG.stderr" respectively.
+
+If one log file already exists, the relative information will be appended to it.
+
+
+ID2 fq2fa.pm
+
+NAME
+
+fq2fa.pm - a fq-to-fa converter.
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use fq2fa;
+fq2fa::help(); #Print this help information
+fq2fa($fq, $fa);
+#************************************************************************************
+# $fq is the directory of input fq file which needs converting.
+# $fa is the directory of output fa file.
+#************************************************************************************
+
+DESCRIPTION
+
+This module is a converter tunning fq file into fa file.
+
+After the conversion, two more files -- time log and error log will be generated. 
+They have names "LOG.txt" and "LOG.stderr" respectively.
+
+If one log file already exists, the relative information will be appended to it.
+
+
+ID3 log_info.pm
+
+NAME
+
+log_info - log information (time information or error warning) of input command.
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use log_info;
+log_info::help(); #Print this help information
+log_info($flag,$cmd);
+#************************************************************************************
+# $cmd is the input command.
+# $flag is the input flag number:
+#    0 means $cmd just started running;
+#    2 means $cmd just finished running;
+#    other numbers mean there is at least one error in the execution of $cmd.
+#************************************************************************************
+
+DESCRIPTION
+
+"log_info" is a module that prints the corresponding log information (time information 
+or error warning) to "LOG.txt" under Current Working Directory according to the input 
+flag number.
+
+Though "LOG.stderr" will be generated, normally this module has nothing to do with it.
+
+If one log file already exists, the relative information will be appended to it.
+
+
+ID4 MKDIR.pm
+
+NAME
+
+MKDIR - make or remake the input directory.
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use MKDIR;
+MKDIR::help(); #Print this help information
+MKDIR($indir); #$indir is the input directory.
+
+DESCRIPTION
+
+What this module does is that if the input directory has already existed, it will
+remove the old input directory and make a new input directory, otherwise it will
+make the input directory.
+
+
+ID5 openfile.pm
+
+NAME
+
+openfile - open the file whose filename is given, and associate it with FILEHANDLE.
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use openfile;
+openfile::help(); #Print this help information
+#my $content=openfile("/share/data/Test_data/BSI/a.fq.tar.gz");
+#my $content=openfile("/share/data/Test_data/BSI/BL16111_1.fq.gz");
+my $content=openfile($filedir);
+#$filedir is the directory of the input file
+#$content is a filehandle, the return value of openfile.
+while (<$content>) {
+	print "$_";
+}
+
+DESCRIPTION
+
+Open the file whose filename is given, and associate it with FILEHANDLE.
+The file can be a compressed package, for instance, a tar package or a gz 
+package.
+
+
+ID6 read_config.pm
+
+NAME
+
+read_config - read config file, and get the tree directories in the config file.
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use read_config;
+read_config::help(); #Print this help information
+my ($Software_path,$Database_path,$Java_path)=read_config($configdir);
+#$configdir is the directory of the config file
+print "$Software_path\n$Database_path\n$Java_path\n";
+
+
+DESCRIPTION
+
+This module mainly proposes a function for reading config file, then returns 
+tree directories in the config file. They are Software_path, Database_path
+and Java_path in turn.
+
+If config file is right, normally this module has nothing to do with "LOG.stderr". 
+Otherwise the error warning will be printed to "LOG.txt" and the error information 
+will be printed to "LOG.stderr".
+
+If one log file already exists, the relative information will be appended to it.
+
+
+ID7 runcmd.pm
+
+NAME
+
+runcmd - run command and print log information to log files
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use runcmd;
+runcmd::help(); #Print this help information
+runcmd($cmdname,$cmd);
+#$cmd is the command
+#$cmdname is the name of $cmd
+
+DESCRIPTION
+
+runcmd aims at running the given command and print log information to log files.
+Before submission, a command log file, "LOG.sh", will be generated. After the 
+command is finished, two more files -- time log and error log will be generated. 
+They have names "LOG.txt" and "LOG.stderr" respectively.
+
+If one log file already exists, the relative information will be appended to it.
+
+
+ID8 statistic.pm
+
+NAME
+
+statistic - statistics of sequencing quality parameters
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use statistic;
+statistic::help(); #Print this help information
+my ($total_reads,$average_quality,$average_GC)=statistic($QCdir);
+#$QCdir is the result directory of QC, "QC/*/fastqc_data.txt".
+print "$total_reads\n$average_quality\n$average_GC\n";
+
+
+DESCRIPTION
+
+This module provides a "statistic" type of three sequencing quality parameters (total 
+reads, average quality, and average GC) to work with QC reports(the reports of R1 and 
+R2 of the same sample).
+
+The input parameter of this module must be the result directory of QC. There are two 
+sub directories under input directory, each of which has a file named fastqc_data.txt.
+
+After the statistic, two more files -- time log and error log will be generated. 
+They have names "LOG.txt" and "LOG.stderr" respectively.
+
+If one log file already exists, the relative information will be appended to it.
+
+
+ID9 sub_time.pm
+
+NAME
+
+sub_time - a subfunction of time
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use sub_time;
+sub_time::help(); #Print this help information
+my $Time_Start = sub_time(localtime(time()));
+my $i=7777;
+while ($i) {
+    for (my $n=$i;$n>0;$n++) {
+        $n-=2;
+    }
+    $i--;
+}
+my $Time_End= sub_time(localtime(time()));
+print "Finished. Running from [$Time_Start] to [$Time_End]\n";
+
+DESCRIPTION
+
+This module allows you to get a time string taking the format of 'yyyy-mm-dd hh:mm:ss'.
+The parameter of this module must be the return value of localtime in list context.
+
+
+ID10 trim.pm
+
+NAME
+
+trim - trim low quality bases in read files
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use trim;
+trim::help();
+my ($H_qual_read)=trim::cut($quality_threshold,$fqR1_dir,$fqR2_dir,$R1out_dir,$R2out_dir);
+print "$H_qual_read\n";
+
+
+DESCRIPTION
+
+This module is to trim low quality bases in read files according to given quality value,
+print high quality reads in read files to output files whose lengths are both bigger 
+than 30 after trimming, and return the number of high quality reads.
+
+
+ID11 uncompress.pm
+
+NAME
+
+uncompress - uncompression for the input fq files, only two files are allowed at a time.
+
+SYNOPSIS
+
+use FindBin qw($Bin);
+use lib "$Bin/../pm";
+use uncompress;
+uncompress::help(); #Print this help information
+my ($fq_1,$fq_2,$filename1,$filename2)=uncompress($fq1,$fq2,$outdir);
+#************************************************************************************
+# $fq1 and $fq2 are the directories of input fq files which need uncompression.
+# $outdir is the output directory where the decompressed fq files are expected to locate.
+#
+# If $fq1 isn't a compressed package, $fq_1 is the original fq directory i.e. $fq1,
+# and $filename1 is a directory under $outdir which does not exist but the downstream
+# process may use as the prefix of its output. Otherwise both $fq_1 and $filename1 
+# represent the directory of decompressed fq1 file.
+# If $fq2 isn't a compressed package, $fq_2 is the original fq directory i.e. $fq2,
+# and $filename2 is a directory under $outdir which does not exist but the downstream
+# process may use as the prefix of its output. Otherwise both $fq_2 and $filename2 
+# represent the directory of decompressed fq2 file.
+#************************************************************************************
+
+DESCRIPTION
+
+The main focus of the uncompress.pm is to get two kinds of directories:
+1. the directory of available fq file which isn't a compressed package;
+2. the directory that the downstream process may use as the prefix of its output.
+
+
